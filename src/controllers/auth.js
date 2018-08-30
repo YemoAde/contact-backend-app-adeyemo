@@ -1,6 +1,7 @@
 import User from '../entities/user';
 import logger from '../utils/logger';
 import Misc from './../utils/misc';
+import PasswordReset from './../entities/passwordReset';
 
 /**
  * Given a json request 
@@ -63,12 +64,61 @@ export const signup = (req, res) => {
  * Implement a way to recover user accounts
  */
 export const forgotPassword = (req, res) => {
-	
-	res.status(404).json({ err: "not implemented" })
+	if(!req.body.email) {
+		return Misc.responseHandler(res, 400, 'provide_email');
+	}
+	User.findOne({email: req.body.email}, (err, user) => {
+		if(err || !user){
+			return Misc.responseHandler(res, 400, 'invalid email');
+		}
+		PasswordReset.findOne({user: user._id}, (err, _reset) => {
+			if(!_reset){
+				let new_reset = new PasswordReset({ user : user._id});
+				new_reset.save((err, reset) => {
+					if(err || !reset){
+						return Misc.responseHandler(res, 400, 'failed');
+					}
+					//alternatively send to mail
+					/**
+					 * @todo Send Token to mail
+					 */
+					return Misc.responseHandler(res, 200, 'reset_token', {reset_token: reset._id})
+				})
+			}else {
+				return Misc.responseHandler(res, 200, 'reset_token', {reset_token: _reset._id})
+			}
+		})
+		
+
+	})
+};
+
+export const resetPassword = (req, res) => {
+	const new_password  = req.body.new_password
+	let token = req.body.reset_token
+	PasswordReset.findById(token, (err, reset) => {
+		if(err || !reset){
+			return Misc.responseHandler(res, 400, 'No Reset History');
+		}
+		console.log(new_password);
+		User.findByIdAndUpdate(reset.user, { password: new_password }, (err, user) => {
+			if(err || !user){
+				return Misc.responseHandler(res, 400, 'update_operation_failed');
+			}else{
+				PasswordReset.findOneAndDelete({user: user._id}, (err, uReset) => {
+					//pass
+				})
+				return Misc.responseHandler(res, 200, 'updated');
+				
+			}
+		})
+		
+	})
 };
 
 export default {
 	login,
 	signup,
-	forgotPassword
+	forgotPassword,
+	resetPassword
 }

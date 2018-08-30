@@ -12,4 +12,5 @@ module.exports = function (app) {
 
 	/*** BONUS POINTS ***/
 	app.route('/auth/forgotPassword').post(_auth2.default.forgotPassword);
+	app.route('/auth/resetPassword').post(_auth2.default.resetPassword);
 };

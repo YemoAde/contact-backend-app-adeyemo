@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.forgotPassword = exports.signup = exports.login = undefined;
+exports.resetPassword = exports.forgotPassword = exports.signup = exports.login = undefined;
 
 var _user = require('../entities/user');
 
@@ -16,6 +16,10 @@ var _logger2 = _interopRequireDefault(_logger);
 var _misc = require('./../utils/misc');
 
 var _misc2 = _interopRequireDefault(_misc);
+
+var _passwordReset = require('./../entities/passwordReset');
+
+var _passwordReset2 = _interopRequireDefault(_passwordReset);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -84,12 +88,57 @@ var signup = exports.signup = function signup(req, res) {
  * Implement a way to recover user accounts
  */
 var forgotPassword = exports.forgotPassword = function forgotPassword(req, res) {
+	if (!req.body.email) {
+		return _misc2.default.responseHandler(res, 400, 'provide_email');
+	}
+	_user2.default.findOne({ email: req.body.email }, function (err, user) {
+		if (err || !user) {
+			return _misc2.default.responseHandler(res, 400, 'invalid email');
+		}
+		_passwordReset2.default.findOne({ user: user._id }, function (err, _reset) {
+			if (!_reset) {
+				var new_reset = new _passwordReset2.default({ user: user._id });
+				new_reset.save(function (err, reset) {
+					if (err || !reset) {
+						return _misc2.default.responseHandler(res, 400, 'failed');
+					}
+					//alternatively send to mail
+					/**
+      * @todo Send Token to mail
+      */
+					return _misc2.default.responseHandler(res, 200, 'reset_token', { reset_token: reset._id });
+				});
+			} else {
+				return _misc2.default.responseHandler(res, 200, 'reset_token', { reset_token: _reset._id });
+			}
+		});
+	});
+};
 
-	res.status(404).json({ err: "not implemented" });
+var resetPassword = exports.resetPassword = function resetPassword(req, res) {
+	var new_password = req.body.new_password;
+	var token = req.body.reset_token;
+	_passwordReset2.default.findById(token, function (err, reset) {
+		if (err || !reset) {
+			return _misc2.default.responseHandler(res, 400, 'No Reset History');
+		}
+		console.log(new_password);
+		_user2.default.findByIdAndUpdate(reset.user, { password: new_password }, function (err, user) {
+			if (err || !user) {
+				return _misc2.default.responseHandler(res, 400, 'update_operation_failed');
+			} else {
+				_passwordReset2.default.findOneAndDelete({ user: user._id }, function (err, uReset) {
+					//pass
+				});
+				return _misc2.default.responseHandler(res, 200, 'updated');
+			}
+		});
+	});
 };
 
 exports.default = {
 	login: login,
 	signup: signup,
-	forgotPassword: forgotPassword
+	forgotPassword: forgotPassword,
+	resetPassword: resetPassword
 };
