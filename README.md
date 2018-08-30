@@ -29,9 +29,16 @@ The assessment project uses babel to transpile ES6/ES7 to ES5
 
 Get Ready to Run
 ---
-
 - Install the projects dependencies 
     - > `npm install`
+    
+- Create .env file from .evn.example
+    - > DB_USER = mongo_user_name
+    - > DB_PASS = mongo_user_password
+    - > JWT_SECRET = a_secret
+
+- Run compiled version.
+    - > `npm run start`
 
 Start Development 
 ---
@@ -41,7 +48,6 @@ Start Development
 - To continuously watch for changes 
     - > `npm run watch`
 
-Submitting
+Submitted
 --
-Push the repo to your defined repo
->`Create a repo on git, push and share the link
+
