@@ -28,7 +28,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 var login = exports.login = function login(req, res) {
 	if (!req.body.username || !req.body.password) {
-		_misc2.default.responseHandler(res, 401, 'Email and Password Required');
+		return _misc2.default.responseHandler(res, 401, 'Email and Password Required');
 	}
 	_user2.default.findOne({ username: req.body.username }, function (err, user) {
 		if (err || !user) {
@@ -44,9 +44,9 @@ var login = exports.login = function login(req, res) {
 				};
 				var _token = _misc2.default.generateToken(payload);
 
-				_misc2.default.responseHandler(res, 200, "login_successful", { token: _token });
+				return _misc2.default.responseHandler(res, 200, "login_successful", { token: _token });
 			} else {
-				_misc2.default.responseHandler(res, 401, "invalid_credentials");
+				return _misc2.default.responseHandler(res, 401, "invalid_credentials");
 			}
 		}).catch(function (err) {
 			_misc2.default.responseHandler(res, 401, "failed");
@@ -77,7 +77,7 @@ var signup = exports.signup = function signup(req, res) {
 		};
 		var _token = _misc2.default.generateToken(payload);
 
-		_misc2.default.responseHandler(res, 200, "user_created", { token: _token });
+		return _misc2.default.responseHandler(res, 200, "user_created", { token: _token });
 	});
 };
 /**

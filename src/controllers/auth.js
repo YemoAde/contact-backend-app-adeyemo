@@ -11,7 +11,7 @@ import Misc from './../utils/misc';
  */
 export const login = (req, res) => {
 	if( !req.body.username || !req.body.password ) {
-		Misc.responseHandler(res, 401, 'Email and Password Required');
+		return Misc.responseHandler(res, 401, 'Email and Password Required');
 	}
 	User.findOne( { username: req.body.username }, ( err, user ) => {
 		if( err || !user ) {return Misc.responseHandler(res, 401, 'User not Found')};
@@ -25,9 +25,9 @@ export const login = (req, res) => {
 				}
 				let _token = Misc.generateToken(payload);
 		
-				Misc.responseHandler (res, 200, "login_successful", {token: _token});
+				return Misc.responseHandler (res, 200, "login_successful", {token: _token});
 			  } else {
-				Misc.responseHandler (res, 401, "invalid_credentials");
+				return Misc.responseHandler (res, 401, "invalid_credentials");
 			  }
 		}).catch (err => { Misc.responseHandler (res, 401, "failed"); })
 	})
@@ -56,7 +56,7 @@ export const signup = (req, res) => {
 		}
 		let _token = Misc.generateToken(payload);
 
-		Misc.responseHandler (res, 200, "user_created", {token: _token});
+		return Misc.responseHandler (res, 200, "user_created", {token: _token});
 	})
 };
 /**
